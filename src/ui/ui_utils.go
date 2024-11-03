@@ -51,5 +51,4 @@ func drawRectangle(width int, height int) string {
 	out += BOTTOM_LEFT_CORNER + strings.Repeat(HORIZONTAL, width-2) + BOTTOM_RIGHT_CORNER
 
 	return out
-
 }

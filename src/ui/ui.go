@@ -44,9 +44,9 @@ func tick(uiManager *UIManager, _ time.Time) {
 	fmt.Print(drawRectangle(uiManager.WindowSize.Width, uiManager.WindowSize.Height))
 
 	fmt.Print("\033[0;2H") // Clear and move cursor to home
-	fmt.Print(" TEST ")
+	fmt.Print(" HTTP TUI ")
 
-	fmt.Print("\033[25") // Clear and move cursor to home
+	fmt.Print("\033[25")
 	// fmt.Print("\033[H") // Clear and move cursor to home
 }
 
