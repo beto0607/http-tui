@@ -40,13 +40,13 @@ func NewUIManager(appConfigs *configs.AppConfigs, logger *log.Logger) (*UIManage
 }
 
 func tick(uiManager *UIManager, _ time.Time) {
-	fmt.Print("\033[H\033[2J") // Clear and move cursor to home
+	fmt.Print(ANSI_MAP["HOME"] + ANSI_MAP["CLEAR"]) // Clear and move cursor to home
 	fmt.Print(drawRectangle(uiManager.WindowSize.Width, uiManager.WindowSize.Height))
 
-	fmt.Print("\033[0;2H") // Clear and move cursor to home
+	fmt.Print(MoveCursorTo(0, 2))
 	fmt.Print(" HTTP TUI ")
 
-	fmt.Print("\033[25")
+	fmt.Print(ANSI_MAP["HIDE_CURSOR"])
 	// fmt.Print("\033[H") // Clear and move cursor to home
 }
 
