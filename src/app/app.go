@@ -2,10 +2,12 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"http-tui/src/configs"
 	"http-tui/src/input"
 	"http-tui/src/logger"
 	"http-tui/src/ui"
+	"http-tui/src/utils"
 	"log"
 	"time"
 )
@@ -21,12 +23,14 @@ type App struct {
 }
 
 func (app App) OnInputEvent(event *input.InputEvent) bool {
-	switch event.KeyCode {
-	case 27, 81, 113: // esc, Q, q
-		StopApp(&app)
-	default:
-		app.Logger.Println(event.KeyCode)
+	if event.CtrlPressed {
 		app.Logger.Println(event.KeyString)
+		app.Logger.Println(event.KeyString == string(utils.CtrlArrowRight))
+	}
+	switch event.KeyString {
+	case "q", "Q", string(utils.Escape):
+		app.Logger.Println("q was pressed")
+		StopApp(&app)
 	}
 
 	return false
@@ -59,6 +63,8 @@ func NewApp(name string, appConfigs *configs.AppConfigs) (*App, error) {
 	if !ok {
 		return nil, errors.New("Couldn't add listener")
 	}
+
+	fmt.Print(utils.SetWindowTitle("HTTP tui"))
 
 	return &app, nil
 }

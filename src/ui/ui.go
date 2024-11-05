@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"http-tui/src/configs"
+	"http-tui/src/utils"
 	"log"
 	"time"
 )
@@ -40,23 +41,40 @@ func NewUIManager(appConfigs *configs.AppConfigs, logger *log.Logger) (*UIManage
 }
 
 func tick(uiManager *UIManager, _ time.Time) {
-	fmt.Print(ANSI_MAP["HOME"] + ANSI_MAP["CLEAR"]) // Clear and move cursor to home
+	// fmt.Print(utils.ANSI_MAP["CLEAR_TO_END"])
+	// fmt.Print(utils.ANSI_MAP["CLEAR_TO_BEGINNING"])
+	fmt.Print(utils.ANSI_MAP["HOME"])
+	// fmt.Print(utils.ANSI_MAP["CLEAR"]) // Clear and move cursor to home
 	fmt.Print(drawRectangle(uiManager.WindowSize.Width, uiManager.WindowSize.Height))
 
-	fmt.Print(MoveCursorTo(0, 2))
+	fmt.Print(utils.MoveCursorTo(0, 2))
+	fmt.Print("\033[32m")
 	fmt.Print(" HTTP TUI ")
+	fmt.Print("\033[0m")
+}
 
-	fmt.Print(ANSI_MAP["HIDE_CURSOR"])
-	// fmt.Print("\033[H") // Clear and move cursor to home
+func setup() {
+	fmt.Print(utils.ANSI_MAP["SCREEN_SAVE"])
+	fmt.Print(utils.ANSI_MAP["SCREEN_MODE_SET"])
+	fmt.Print(utils.ANSI_MAP["HIDE_CURSOR"])
+}
+
+func revertSetup() {
+	fmt.Print(utils.ANSI_MAP["SHOW_CURSOR"])
+	fmt.Print(utils.ANSI_MAP["CLEAR"]) // Clear and move cursor to home
+	fmt.Print(utils.ANSI_MAP["SCREEN_MODE_UNSET"])
+	fmt.Print(utils.ANSI_MAP["SCREEN_RESTORE"])
 }
 
 // UI Loop
 func StartUI(uiManager *UIManager) {
+	setup()
 	uiManager.logger.Printf("Start uiManager")
 	go func() {
 		for {
 			select {
 			case <-uiManager.tickerStopper:
+				revertSetup()
 				return
 			case t := <-uiManager.ticker.C:
 				tick(uiManager, t)

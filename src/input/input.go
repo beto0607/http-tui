@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -56,7 +57,7 @@ func StartInput(inputManager *InputManager) {
 }
 
 func tick(inputManager *InputManager) {
-	buffer := make([]byte, 1)
+	buffer := make([]byte, 10) // ANSI characters from xterm are 4 bytes
 
 	n, err := inputManager.reader.Read(buffer)
 	if err != nil {
@@ -66,11 +67,38 @@ func tick(inputManager *InputManager) {
 		return
 	}
 
-	event := InputEvent{
-		handled:   false,
-		KeyCode:   int8(buffer[0]),
-		KeyString: string(buffer),
+	startsWithEsc := buffer[0] == 27
+	metaKeyPressed := false
+	ctrlPressed := false
+	shiftPressed := false
+	trimmed := strings.Trim(string(buffer), "\000")
+
+	if len(trimmed) == 0 {
+		trimmed = "\000"
+	} else if startsWithEsc && len(trimmed) == 2 {
+		// <esc> + <char> means meta key pressed
+		metaKeyPressed = true
+		trimmed = trimmed[1:]
+	} else if buffer[0] < 27 {
+		// 1-26 are ctrl+A to ctrl+Z
+		ctrlPressed = true
+		trimmed = string(rune(buffer[0] + 64))
+	} else if startsWithEsc && len(trimmed) > 4 && "5" == string(trimmed[4]) {
+		// <esc> [1;5<char> means ctrl key pressed
+		ctrlPressed = true
+	} else if startsWithEsc && len(trimmed) > 4 && "2" == string(trimmed[4]) {
+		// <esc> [1;2<char> means shift key pressed
+		shiftPressed = true
 	}
+	event := InputEvent{
+		handled:      false,
+		MetaPressed:  metaKeyPressed,
+		CtrlPressed:  ctrlPressed,
+		ShiftPressed: shiftPressed,
+		KeyString:    trimmed,
+	}
+	inputManager.logger.Println(buffer)
+	inputManager.logger.Println(trimmed[1:])
 
 	for i := len(inputManager.listeners) - 1; i >= 0; i-- {
 		listener := inputManager.listeners[i]

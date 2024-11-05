@@ -1,9 +1,11 @@
 package input
 
 type InputEvent struct {
-	KeyCode   int8
-	KeyString string
-	handled   bool
+	KeyString    string
+	MetaPressed  bool
+	CtrlPressed  bool
+	ShiftPressed bool
+	handled      bool
 }
 
 func (event *InputEvent) StopProgation() {
